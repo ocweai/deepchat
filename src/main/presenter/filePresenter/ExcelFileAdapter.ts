@@ -44,7 +44,8 @@ export class ExcelFileAdapter extends BaseFileAdapter {
     }
 
     // 转换为格式化的字符串
-    return rows.map(row => row.join('\t')).join('\n')
+    const execlToJSON = row => JSON.stringify({ question: row.at(0), answer: row.slice(1).join('') }) + '\t'
+    return rows.map(row => execlToJSON(row)).join('\n')
   }
 
   async getContent(): Promise<string | undefined> {
