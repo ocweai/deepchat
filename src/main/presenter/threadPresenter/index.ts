@@ -770,10 +770,26 @@ export class ThreadPresenter implements IThreadPresenter {
         throw new Error('找不到用户消息')
       }
 
+      function getAnswer(files) {
+        const text = userMessage?.content.text || ''
+        const file = files.find(item => item.content.indexOf(text) > -1)
+        if (!file) {
+          return files
+        }
+
+        const textIndex = file.content.indexOf(text)
+        const questionStart = file.content.slice(0, textIndex).lastIndexOf('question')
+        const questionEnd = textIndex + file.content.slice(textIndex).indexOf('question')
+
+        const content = file.content.slice(questionStart, questionEnd) + '以 answer 的内容为准'
+
+        return [{ ...file, content }]
+      }
+
       // 处理本地文本信息
       const userContent = `
       ${userMessage.content.text}
-      ${getFileContext(userMessage.content.files)}
+      ${getFileContext(getAnswer(userMessage.content.files))}
       `
       // 从用户消息中提取并丰富URL内容
       urlResults = await ContentEnricher.extractAndEnrichUrls(userMessage.content.text)
